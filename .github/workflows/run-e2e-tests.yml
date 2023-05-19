@@ -1,0 +1,31 @@
+name: Run E2e Tests
+
+on: [pull_request]
+
+jobs:
+  run-e2e-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-latest
+
+    services:
+      api-solid-ps:
+        image: bitnami/postgresql
+        ports:
+          - 5432:5432
+        environment:
+          - POSTGRESQL_USERNAME=admin
+          - POSTGRESQL_PASSWORD=admin
+          - POSTGRESQL_DATABASE=apisolid
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn test:e2e
+        env: testing
+        DATABASE_URL: "postgresql://admin:admin@localhost:5432/apisolid?schema=public"
